@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Net/UnrealNetwork.h"
 #include "UE4ReplicationTestCharacter.generated.h"
 
 class UInputComponent;
@@ -138,5 +139,8 @@ public:
 	/** Returns FirstPersonCameraComponent subobject **/
 	FORCEINLINE class UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
+	/* REPLICATION TEST */
+	virtual void Tick(float DeltaTime) override;
+	UPROPERTY(replicated) bool testvar = false;
+	UFUNCTION(Server, Reliable) void ServerSetTestvar(AUE4ReplicationTestCharacter* player);
 };
-

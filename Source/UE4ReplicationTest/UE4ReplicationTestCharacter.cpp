@@ -140,6 +140,8 @@ void AUE4ReplicationTestCharacter::SetupPlayerInputComponent(class UInputCompone
 
 void AUE4ReplicationTestCharacter::OnFire()
 {
+	/* REPLICATION TEST */
+	ServerSetTestvar(this);
 	// try and fire a projectile
 	if (ProjectileClass != NULL)
 	{
@@ -297,4 +299,22 @@ bool AUE4ReplicationTestCharacter::EnableTouchscreenMovement(class UInputCompone
 	}
 	
 	return false;
+}
+
+/* REPLICATION TEST */
+void AUE4ReplicationTestCharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME_CONDITION(AUE4ReplicationTestCharacter, testvar, COND_SkipOwner);  // NOTE: comment me out to test replication with no condition
+}
+
+void AUE4ReplicationTestCharacter::ServerSetTestvar_Implementation(AUE4ReplicationTestCharacter* player) {
+	player->testvar = true;
+}
+
+#define REAL IsOwnedBy(UGameplayStatics::GetPlayerController(this, 0))
+#define HOST HasAuthority()
+void AUE4ReplicationTestCharacter::Tick(float DeltaTime) {
+	Super::Tick(DeltaTime);
+	if (testvar)
+		GEngine->AddOnScreenDebugMessage(-1, 8.0f, HOST ? FColor::Orange : FColor::Green, FString(HOST ? "host " : "client ") + (REAL ? FString("real ") : (FString("copy of ") + FString(HOST ? "client " : "host "))) + FString("says: ") + FString("TESTVAR SET"));
 }
